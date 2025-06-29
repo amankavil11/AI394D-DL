@@ -21,7 +21,7 @@ class WeatherForecast:
             min_per_day: tensor of size (num_days,)
             max_per_day: tensor of size (num_days,)
         """
-        raise NotImplementedError
+        return (self.data.min(dim=1)[0], self.data.max(dim=1)[0])
 
     def find_the_largest_drop(self) -> torch.Tensor:
         """
@@ -31,7 +31,7 @@ class WeatherForecast:
         Returns:
             tensor of a single value, the difference in temperature
         """
-        raise NotImplementedError
+        return torch.min(self.data.mean(dim=1)[1:] - self.data.mean(dim=1)[:-1])
 
     def find_the_most_extreme_day(self) -> torch.Tensor:
         """
@@ -40,7 +40,8 @@ class WeatherForecast:
         Returns:
             tensor with size (num_days,)
         """
-        raise NotImplementedError
+        diff_max_idx = torch.argmax(torch.abs(self.data - self.data.mean(dim=1, keepdim=True)), dim=1, keepdim=True).view(-1)
+        return self.data[torch.arange(len(diff_max_idx)),diff_max_idx]
 
     def max_last_k_days(self, k: int) -> torch.Tensor:
         """
@@ -49,7 +50,7 @@ class WeatherForecast:
         Returns:
             tensor of size (k,)
         """
-        raise NotImplementedError
+        return self.data[-k:].max(dim=1)[0]
 
     def predict_temperature(self, k: int) -> torch.Tensor:
         """
@@ -62,7 +63,7 @@ class WeatherForecast:
         Returns:
             tensor of a single value, the predicted temperature
         """
-        raise NotImplementedError
+        return self.data[-k:].mean()
 
     def what_day_is_this_from(self, t: torch.FloatTensor) -> torch.LongTensor:
         """
@@ -87,4 +88,4 @@ class WeatherForecast:
         Returns:
             tensor of a single value, the index of the closest data element
         """
-        raise NotImplementedError
+        return torch.argmin(torch.abs(self.data - t).sum(dim=1)).long()
