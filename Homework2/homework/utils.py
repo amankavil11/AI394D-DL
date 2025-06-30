@@ -34,10 +34,10 @@ class SuperTuxDataset(Dataset):
         return self.data[idx]
 
 
-def load_data(dataset_path: str, num_workers: int = 0, batch_size: int = 128, shuffle: bool = False) -> DataLoader:
+def load_data(dataset_path: str, num_workers: int = 0, batch_size: int = 128, shuffle: bool = False, pin_memory: bool = True) -> DataLoader:
     dataset = SuperTuxDataset(dataset_path)
 
-    return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=shuffle, drop_last=True)
+    return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=shuffle, pin_memory=pin_memory, drop_last=True)
 
 
 def compute_accuracy(outputs: torch.Tensor, labels: torch.Tensor):
