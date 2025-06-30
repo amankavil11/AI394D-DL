@@ -21,7 +21,6 @@ def train(
 ):
     if torch.cuda.is_available():
         device = torch.device("cuda")
-        print(device)
     elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
         device = torch.device("mps")
     else:
@@ -69,7 +68,7 @@ def train(
             # TODO: implement training step
             optimizer.zero_grad()
             logits = model(img)
-            metrics['train_acc'].append(torch.argmax(logits, dim=1) == label)
+            metrics['train_acc'].append((torch.argmax(logits, dim=1) == label).float().mean().item())
             loss = loss_func(logits, label)
             loss.backward()
             optimizer.step()
@@ -85,7 +84,7 @@ def train(
 
                 # TODO: compute validation accuracy
                 logits = model(img)
-                metrics['val_acc'].append((torch.argmax(logits, dim=1) == label).mean().item())
+                metrics['val_acc'].append((torch.argmax(logits, dim=1) == label).float().mean().item())
 
         # log average train and val accuracy to tensorboard
         epoch_train_acc = torch.as_tensor(metrics["train_acc"]).mean()
