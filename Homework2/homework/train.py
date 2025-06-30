@@ -21,6 +21,7 @@ def train(
 ):
     if torch.cuda.is_available():
         device = torch.device("cuda")
+        print(device)
     elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
         device = torch.device("mps")
     else:
@@ -43,9 +44,13 @@ def train(
     train_data = load_data("classification_data/train", shuffle=True, batch_size=batch_size, num_workers=2)
     val_data = load_data("classification_data/val", shuffle=False)
 
+    if torch.cuda.is_available():
+        train_data.pin_memory = True
+        val_data.pin_memory = True
+
     # create loss function and optimizer
     loss_func = ClassificationLoss()
-    # optimizer = ...
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.1)
 
     global_step = 0
     metrics = {"train_acc": [], "val_acc": []}
@@ -62,7 +67,12 @@ def train(
             img, label = img.to(device), label.to(device)
 
             # TODO: implement training step
-            raise NotImplementedError("Training step not implemented")
+            optimizer.zero_grad()
+            logits = model(img)
+            metrics['train_acc'].append(torch.argmax(logits, dim=1) == label)
+            loss = loss_func(logits, label)
+            loss.backward()
+            optimizer.step()
 
             global_step += 1
 
@@ -74,13 +84,16 @@ def train(
                 img, label = img.to(device), label.to(device)
 
                 # TODO: compute validation accuracy
-                raise NotImplementedError("Validation accuracy not implemented")
+                logits = model(img)
+                metrics['val_acc'].append((torch.argmax(logits, dim=1) == label).mean().item())
 
         # log average train and val accuracy to tensorboard
         epoch_train_acc = torch.as_tensor(metrics["train_acc"]).mean()
         epoch_val_acc = torch.as_tensor(metrics["val_acc"]).mean()
 
-        raise NotImplementedError("Logging not implemented")
+        logger.add_scalar("train_accuracy", epoch_train_acc, global_step)
+        logger.add_scalar("val_accuracy", epoch_val_acc, global_step)
+
 
         # print on first, last, every 10th epoch
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
@@ -90,10 +103,10 @@ def train(
                 f"val_acc={epoch_val_acc:.4f}"
             )
 
-    # save and overwrite the model in the root directory for grading
+    # # save and overwrite the model in the root directory for grading
     save_model(model)
 
-    # save a copy of model weights in the log directory
+    # # save a copy of model weights in the log directory
     torch.save(model.state_dict(), log_dir / f"{model_name}.th")
     print(f"Model saved to {log_dir / f'{model_name}.th'}")
 
