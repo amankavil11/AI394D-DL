@@ -2,4 +2,5 @@ flowers/
 *data/
 *.zip
 __pycache__/
+*.th
 logs/
