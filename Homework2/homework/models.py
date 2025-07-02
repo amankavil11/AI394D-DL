@@ -97,8 +97,8 @@ class MLPClassifier(nn.Module):
 class MLPClassifierDeep(nn.Module):
     def __init__(
         self,
-        hidden_dim: int = 128,
-        num_layers: int = 3,
+        hidden_dim: int = 64,
+        num_layers: int = 4,
         h: int = 64,
         w: int = 64,
         num_classes: int = 6,
@@ -124,6 +124,7 @@ class MLPClassifierDeep(nn.Module):
         for _ in range(num_layers):
             layers.append(nn.Linear(hidden_dim,hidden_dim))
             layers.append(nn.ReLU())
+            layers.append(nn.Dropout(0.4))
         
         layers.append(nn.Linear(hidden_dim, num_classes))
         
