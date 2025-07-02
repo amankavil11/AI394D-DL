@@ -76,8 +76,8 @@ class MLPClassifier(nn.Module):
         self.model = nn.Sequential(
             nn.Flatten(),
             nn.Linear(3 * h * w, 128),
-            nn.ReLU(),
-            nn.Dropout(0.2)
+            nn.GELU(),
+            nn.Dropout(0.3),
             nn.Linear(128, num_classes)
         )
 
