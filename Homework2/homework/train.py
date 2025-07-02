@@ -125,6 +125,7 @@ if __name__ == "__main__":
 
     # optional: additional model hyperparamters
     parser.add_argument("--num_layers", type=int, default=3)
+    parser.add_argument("--hidden_dim", type=int, default=128)
 
     # pass all arguments to train
     train(**vars(parser.parse_args()))
