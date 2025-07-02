@@ -97,6 +97,8 @@ class MLPClassifier(nn.Module):
 class MLPClassifierDeep(nn.Module):
     def __init__(
         self,
+        hidden_dim: int = 128,
+        num_layers: int = 3,
         h: int = 64,
         w: int = 64,
         num_classes: int = 6,
@@ -115,7 +117,17 @@ class MLPClassifierDeep(nn.Module):
         """
         super().__init__()
 
-        raise NotImplementedError("MLPClassifierDeep.__init__() is not implemented")
+        layers = []
+        layers.extend([nn.Flatten(), nn.Linear(3 * h * w, hidden_dim)])
+        layers.append(nn.ReLU())
+
+        for _ in range(num_layers):
+            layers.append(nn.Linear(hidden_dim,hidden_dim))
+            layers.append(nn.ReLU())
+        
+        layers.append(nn.Linear(hidden_dim, num_classes))
+        
+        self.model = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -125,7 +137,7 @@ class MLPClassifierDeep(nn.Module):
         Returns:
             tensor (b, num_classes) logits
         """
-        raise NotImplementedError("MLPClassifierDeep.forward() is not implemented")
+        return self.model(x)
 
 
 class MLPClassifierDeepResidual(nn.Module):
@@ -146,6 +158,7 @@ class MLPClassifierDeepResidual(nn.Module):
             num_layers: int, number of hidden layers
         """
         super().__init__()
+
 
         raise NotImplementedError("MLPClassifierDeepResidual.__init__() is not implemented")
 
@@ -193,6 +206,11 @@ def load_model(model_name: str, with_weights: bool = False, **model_kwargs):
     """
     Called by the grader to load a pre-trained model by name
     """
+    # if model_name == "mlp_deep":
+    #     model_kwargs.setdefault("hidden_dim", 128)   
+    #     model_kwargs.setdefault("num_layers", 3)
+
+
     r = model_factory[model_name](**model_kwargs)
     if with_weights:
         model_path = Path(__file__).resolve().parent / f"{model_name}.th"

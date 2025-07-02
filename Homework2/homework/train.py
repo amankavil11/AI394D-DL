@@ -124,7 +124,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=2024)
 
     # optional: additional model hyperparamters
-    # parser.add_argument("--num_layers", type=int, default=3)
+    parser.add_argument("--num_layers", type=int, default=3)
 
     # pass all arguments to train
     train(**vars(parser.parse_args()))
