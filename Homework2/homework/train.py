@@ -15,7 +15,7 @@ def train(
     model_name: str = "linear",
     num_epoch: int = 50,
     lr: float = 1e-3,
-    batch_size: int = 256,
+    batch_size: int = 128,
     seed: int = 2024,
     **kwargs,
 ):
@@ -52,8 +52,8 @@ def train(
     if model_name == 'linear':
         optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.1)
     elif model_name == 'mlp_deep':
-        num_epoch = 100
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.0005, weight_decay=1e-4)
+        num_epoch = 60
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay = 1e-4)
     else:
         num_epoch = 100
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)

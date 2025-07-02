@@ -121,10 +121,14 @@ class MLPClassifierDeep(nn.Module):
         layers.extend([nn.Flatten(), nn.Linear(3 * h * w, hidden_dim)])
         layers.append(nn.ReLU())
 
-        for _ in range(num_layers):
-            layers.append(nn.Linear(hidden_dim,hidden_dim))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(0.4))
+        for i, _ in enumerate(range(num_layers)):
+            if i >= num_layers - 1:
+                layers.append(nn.Linear(hidden_dim, hidden_dim // 2))
+                hidden_dim //= 2
+            else:
+                layers.append(nn.Linear(hidden_dim, hidden_dim))
+            layers.append(nn.GELU())
+            layers.append(nn.Dropout(0.3))
         
         layers.append(nn.Linear(hidden_dim, num_classes))
         
