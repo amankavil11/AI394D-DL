@@ -52,7 +52,7 @@ def train(
     if model_name == 'linear':
         optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.1)
     else:
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     global_step = 0
     metrics = {"train_acc": [], "val_acc": []}
