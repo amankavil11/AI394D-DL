@@ -35,6 +35,8 @@ def train(
     log_dir = Path(exp_dir) / f"{model_name}_{datetime.now().strftime('%m%d_%H%M%S')}"
     logger = tb.SummaryWriter(log_dir)
 
+
+    print(kwargs['num_layers'], kwargs['hidden_dim'])
     # note: the grader uses default kwargs, you'll have to bake them in for the final submission
     model = load_model(model_name, **kwargs)
     model = model.to(device)
@@ -127,8 +129,8 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=2024)
 
     # optional: additional model hyperparamters
-    parser.add_argument("--num_layers", type=int, default=3)
-    parser.add_argument("--hidden_dim", type=int, default=128)
+    parser.add_argument("--num_layers", type=int, default=4)
+    parser.add_argument("--hidden_dim", type=int, default=64)
 
     # pass all arguments to train
     train(**vars(parser.parse_args()))

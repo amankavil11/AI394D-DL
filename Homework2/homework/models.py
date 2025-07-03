@@ -116,6 +116,7 @@ class MLPClassifierDeep(nn.Module):
             num_layers: int, number of hidden layers
         """
         super().__init__()
+        
 
         layers = []
         layers.extend([nn.Flatten(), nn.Linear(3 * h * w, hidden_dim)])
