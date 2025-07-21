@@ -15,6 +15,7 @@ def train(exp_dir: str = "logs",
           num_epoch: int = 50,
           lr: float = 1e-3,
           batch_size: int = 128,
+          weight_decay: float = 1e-4,
           seed: int = 2024,
           ):
     if torch.cuda.is_available():
@@ -41,7 +42,7 @@ def train(exp_dir: str = "logs",
 
     # create loss function and optimizer
     loss_func = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     global_step = 0
     metrics = {"train_acc": [], "val_acc": []}

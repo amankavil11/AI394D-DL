@@ -4,8 +4,6 @@ import torch
 import torch.nn as nn
 
 HOMEWORK_DIR = Path(__file__).resolve().parent
-# INPUT_MEAN = [0.2788, 0.2657, 0.2629]
-# INPUT_STD = [0.2064, 0.1944, 0.2252]
 
 
 class Classifier(nn.Module):
@@ -38,6 +36,7 @@ class Classifier(nn.Module):
                     nn.ReLU(),
                     nn.Conv2d(out_channels, out_channels, kernel_sizes[2], stride=1, padding=kernel_sizes[2] // 2),
                     nn.ReLU(),
+                    nn.Dropout(0.3)
                 )
                 if self.residual:
                     self.identity = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride)
@@ -77,8 +76,6 @@ class Classifier(nn.Module):
         Returns:
             tensor (b, num_classes) logits
         """
-        # optional: normalizes the input
-        # z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
         return self.model(x).squeeze(-1).squeeze(-1)
     

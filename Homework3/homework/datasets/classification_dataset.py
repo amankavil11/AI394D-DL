@@ -47,7 +47,7 @@ class SuperTuxDataset(Dataset):
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05),
                     transforms.RandomGrayscale(p=0.1),
-                ], p=0.6)
+                ], p=0.8)
                 ]
             )
 
