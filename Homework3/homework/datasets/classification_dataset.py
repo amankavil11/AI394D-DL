@@ -74,7 +74,7 @@ def load_data(
     dataset_path: str,
     transform_pipeline: str = "default",
     return_dataloader: bool = True,
-    num_workers: int = 2,
+    num_workers: int = 4,
     batch_size: int = 64,
     shuffle: bool = False,
 ) -> DataLoader | Dataset:

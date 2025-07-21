@@ -64,7 +64,7 @@ class Classifier(nn.Module):
 
         layers.append(self.first_conv_layer)
         layers.append(BlockLayer(96, 192, residual=True))
-        layers.append(BlockLayer(192, 384))
+        layers.append(BlockLayer(192, 384, residual=True))
         layers.append(self.classifier)
 
         self.model = nn.Sequential(*layers)
