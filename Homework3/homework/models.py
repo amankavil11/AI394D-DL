@@ -80,7 +80,7 @@ class Classifier(nn.Module):
         # optional: normalizes the input
         # z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
-        return self.model(x).view(x.size(0), -1)
+        return self.model(x).squeeze(-1).squeeze(-1)
     
     def predict(self, x: torch.Tensor) -> torch.Tensor:
         """

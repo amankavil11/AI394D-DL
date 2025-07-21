@@ -14,7 +14,7 @@ def train(exp_dir: str = "logs",
           dataset_path: str = "classification_data",
           num_epoch: int = 50,
           lr: float = 1e-3,
-          batch_size: int = 64,
+          batch_size: int = 128,
           seed: int = 2024,
           ):
     if torch.cuda.is_available():
@@ -36,12 +36,8 @@ def train(exp_dir: str = "logs",
     model = load_model(model_name).to(device)
     model.train()
 
-    train_data = load_data(f"{dataset_path}/train", transform_pipeline="aug", batch_size=batch_size, shuffle=True)
-    val_data = load_data(f"{dataset_path}/val")
-
-    if torch.cuda.is_available():
-        train_data.pin_memory = True
-        val_data.pin_memory = True
+    train_data = load_data(f"{dataset_path}/train", transform_pipeline="aug", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available())
+    val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available())
 
     # create loss function and optimizer
     loss_func = torch.nn.CrossEntropyLoss()
@@ -55,15 +51,16 @@ def train(exp_dir: str = "logs",
         for key in metrics:
             metrics[key].clear()
 
+        model.train()
+
         for img, label in train_data:
             img, label = img.to(device), label.to(device)
 
             optimizer.zero_grad()
 
             logits = model(img)
-            prediction = model.predict(img)
 
-            metrics['train_acc'].append((prediction == label).float().mean().item())
+            metrics['train_acc'].append((torch.argmax(logits, dim=1) == label).float().mean().item())
             
             loss = loss_func(logits, label)
             loss.backward()

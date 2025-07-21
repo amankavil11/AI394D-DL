@@ -75,8 +75,9 @@ def load_data(
     transform_pipeline: str = "default",
     return_dataloader: bool = True,
     num_workers: int = 4,
-    batch_size: int = 64,
+    batch_size: int = 128,
     shuffle: bool = False,
+    pin_memory: bool = False
 ) -> DataLoader | Dataset:
     """
     Constructs the dataset/dataloader.
@@ -103,6 +104,7 @@ def load_data(
         batch_size=batch_size,
         shuffle=shuffle,
         drop_last=True,
+        pin_memory=pin_memory
     )
 
 
