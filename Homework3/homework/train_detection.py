@@ -15,7 +15,7 @@ from .metrics import DetectionMetric
 def train(exp_dir: str = "logs",
           model_name: str = "detector",
           dataset_path: str = "drive_data",
-          num_epoch: int = 60,
+          num_epoch: int = 75,
           lr: float = 1e-3,
           batch_size: int = 64,
           weight_decay: float = 1e-4,
@@ -66,8 +66,8 @@ def train(exp_dir: str = "logs",
             preds = torch.argmax(logits, dim=1)
             train_metrics.add(preds, track, depth, true_depth)
 
-            
-            loss = segment_loss_func(logits, track) + regressor_loss_func(depth, true_depth)
+
+            loss = segment_loss_func(logits, track) + (0.3 * regressor_loss_func(depth, true_depth))
             loss.backward()
 
             optimizer.step()
