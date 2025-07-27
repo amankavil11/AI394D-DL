@@ -12,7 +12,7 @@ from .datasets.classification_dataset import load_data
 def train(exp_dir: str = "logs",
           model_name: str = "classifier",
           dataset_path: str = "classification_data",
-          num_epoch: int = 75,
+          num_epoch: int = 40,
           lr: float = 1e-3,
           batch_size: int = 128,
           weight_decay: float = 1e-4,

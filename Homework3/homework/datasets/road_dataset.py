@@ -69,9 +69,10 @@ def load_data(
     dataset_path: str,
     transform_pipeline: str = "default",
     return_dataloader: bool = True,
-    num_workers: int = 2,
+    num_workers: int = 10,
     batch_size: int = 32,
     shuffle: bool = False,
+    pin_memory: bool = True
 ) -> DataLoader | Dataset:
     """
     Constructs the dataset/dataloader.
@@ -109,4 +110,5 @@ def load_data(
         num_workers=num_workers,
         batch_size=batch_size,
         shuffle=shuffle,
+        pin_memory=pin_memory
     )

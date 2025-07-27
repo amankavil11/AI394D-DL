@@ -21,9 +21,6 @@ class Classifier(nn.Module):
         """
         super().__init__()
 
-        # self.register_buffer("input_mean", torch.as_tensor(INPUT_MEAN))
-        # self.register_buffer("input_std", torch.as_tensor(INPUT_STD))
-
         class BlockLayer(nn.Module):
             def __init__(self, in_channels, out_channels, kernel_sizes=[3, 1, 3], stride=2, residual=False):
                 super().__init__()
@@ -94,10 +91,11 @@ class Classifier(nn.Module):
         return self(x).argmax(dim=1)
 
 
-class Detector(torch.nn.Module):
+class Detector(nn.Module):
     def __init__(
         self,
         in_channels: int = 3,
+        first_out_channels: int = 64,
         num_classes: int = 3,
     ):
         """
@@ -109,11 +107,83 @@ class Detector(torch.nn.Module):
         """
         super().__init__()
 
-        # self.register_buffer("input_mean", torch.as_tensor(INPUT_MEAN))
-        # self.register_buffer("input_std", torch.as_tensor(INPUT_STD))
+        class DownSampleBlock(nn.Module):
+            def __init__(self, in_channels, out_channels, kernel_size = 3, padding = 1,stride = 2):
+                super().__init__()
+                self.initial_convs = nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels, kernel_size, padding=padding),
+                    nn.ReLU(),
+                    nn.Conv2d(out_channels, out_channels, kernel_size, padding=padding),
+                    nn.ReLU(),
+                )
+                self.down_sample = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=padding, stride=stride)
+                
 
-        # TODO: implement
-        pass
+            def forward(self, x):
+                out = self.initial_convs(x)
+                residual = out  # save for skip connection
+                out = self.down_sample(out)
+                return out, residual
+
+        class BottleneckBlock(nn.Module):
+            def __init__(self, in_channels, out_channels, kernel_size = 3, padding = 1):
+                super().__init__()
+                self.bottleneck = nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels, kernel_size, padding=padding),
+                    nn.ReLU(),
+                    nn.Conv2d(out_channels, out_channels, kernel_size, padding=padding),
+                    nn.ReLU(),
+                )
+
+            def forward(self, x):
+                return self.bottleneck(x)
+
+
+        class UpSampleBlock(nn.Module):
+            def __init__(self, in_channels, out_channels, kernel_size = 3, padding = 1, stride = 2):
+                super().__init__()
+                self.up_sample = nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, output_padding=padding)
+                
+                self.concluding_convs = nn.Sequential(
+                    nn.Conv2d(out_channels * 2, out_channels, kernel_size, padding=padding),
+                    nn.ReLU(),
+                    nn.Conv2d(out_channels, out_channels, kernel_size, padding=padding),
+                    nn.ReLU(),
+                )
+
+            def forward(self, x, residual = None):
+                out = self.up_sample(x)
+                if residual is not None:
+                    out = nn.functional.interpolate(out, size=residual.shape[2:], mode='bilinear', align_corners=False)
+                    out = torch.cat([residual, out], dim=1)
+                out = self.concluding_convs(out)
+                return out
+
+        self.down_layers = nn.ModuleList()
+        self.up_layers = nn.ModuleList()
+        num_down_layers = num_up_layers = 2
+
+        for i in range(num_down_layers):
+            if i == 0:
+                in_ch = in_channels
+                out_ch = first_out_channels
+            else:
+                in_ch = first_out_channels * (2 ** (i - 1))
+                out_ch = first_out_channels * (2 ** i)
+            
+            layer = DownSampleBlock(in_ch, out_channels=out_ch)
+            self.down_layers.append(layer)
+
+        self.bottleneck = BottleneckBlock(first_out_channels * (2 ** (num_down_layers - 1)), first_out_channels * (2 ** num_down_layers))
+
+        for i in range(num_up_layers):
+            in_ch = first_out_channels * (2 ** (num_up_layers - i ))
+            out_ch = int(first_out_channels * (2 ** (num_up_layers - (i + 1))))
+            self.up_layers.append(UpSampleBlock(in_ch, out_channels=out_ch))
+
+        self.classifier = nn.Conv2d(first_out_channels, num_classes, kernel_size=1)
+        self.depth_regressor = nn.Conv2d(first_out_channels, 1, kernel_size=1)
+        
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -128,14 +198,25 @@ class Detector(torch.nn.Module):
                 - logits (b, num_classes, h, w)
                 - depth (b, h, w)
         """
-        # optional: normalizes the input
-        z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
+        h_in, w_in = x.shape[2:] 
 
-        # TODO: replace with actual forward pass
-        logits = torch.randn(x.size(0), 3, x.size(2), x.size(3))
-        raw_depth = torch.rand(x.size(0), x.size(2), x.size(3))
+        residuals = []
+        for layer in self.down_layers:
+            x, residual = layer(x)
+            residuals.append(residual)
 
-        return logits, raw_depth
+        x = self.bottleneck(x)
+
+        for layer in self.up_layers:
+            x = layer(x, residual=residuals.pop() if residuals else None)
+
+        logits = self.classifier(x)
+        logits = logits[:, :, :h_in, :w_in]
+
+        depth = self.depth_regressor(x).squeeze(1)
+        depth = torch.sigmoid(depth[:, :h_in, :w_in])
+
+        return logits, depth
 
     def predict(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
