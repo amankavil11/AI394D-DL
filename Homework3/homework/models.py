@@ -112,8 +112,10 @@ class Detector(nn.Module):
                 super().__init__()
                 self.initial_convs = nn.Sequential(
                     nn.Conv2d(in_channels, out_channels, kernel_size, padding=padding),
+                    nn.BatchNorm2d(out_channels),
                     nn.ReLU(),
                     nn.Conv2d(out_channels, out_channels, kernel_size, padding=padding),
+                    nn.BatchNorm2d(out_channels),
                     nn.ReLU(),
                 )
                 self.down_sample = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=padding, stride=stride)
@@ -130,8 +132,10 @@ class Detector(nn.Module):
                 super().__init__()
                 self.bottleneck = nn.Sequential(
                     nn.Conv2d(in_channels, out_channels, kernel_size, padding=padding),
+                    nn.BatchNorm2d(out_channels),
                     nn.ReLU(),
                     nn.Conv2d(out_channels, out_channels, kernel_size, padding=padding),
+                    nn.BatchNorm2d(out_channels),
                     nn.ReLU(),
                 )
 
@@ -146,8 +150,10 @@ class Detector(nn.Module):
                 
                 self.concluding_convs = nn.Sequential(
                     nn.Conv2d(out_channels * 2, out_channels, kernel_size, padding=padding),
+                    nn.BatchNorm2d(out_channels),
                     nn.ReLU(),
                     nn.Conv2d(out_channels, out_channels, kernel_size, padding=padding),
+                    nn.BatchNorm2d(out_channels),
                     nn.ReLU(),
                 )
 
@@ -161,7 +167,7 @@ class Detector(nn.Module):
 
         self.down_layers = nn.ModuleList()
         self.up_layers = nn.ModuleList()
-        num_down_layers = num_up_layers = 3
+        num_down_layers = num_up_layers = 2
 
         for i in range(num_down_layers):
             if i == 0:
