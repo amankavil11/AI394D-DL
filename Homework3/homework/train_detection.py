@@ -100,7 +100,7 @@ def train(exp_dir: str = "logs",
          # print on first, last, every 10th epoch
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
             print(
-                f"Epoch {epoch + 1:2d} / {num_epoch:2d}: "
+                f"\nEpoch {epoch + 1:2d} / {num_epoch:2d}: "
                 f"train_metrics={train_metrics.compute()} "
                  f"val_metrics={val_metrics.compute()}"
             )
