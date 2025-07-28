@@ -15,7 +15,7 @@ from .metrics import DetectionMetric
 def train(exp_dir: str = "logs",
           model_name: str = "detector",
           dataset_path: str = "drive_data",
-          num_epoch: int = 75,
+          num_epoch: int = 120,
           lr: float = 1e-3,
           batch_size: int = 64,
           weight_decay: float = 1e-4,
