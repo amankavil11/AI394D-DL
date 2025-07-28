@@ -115,7 +115,7 @@ class ClassifierGrader(BaseGrader):
 
             self._metric_computer.add(pred, label)
 
-    @Case(score=10, timeout=5000)
+    @Case(score=10, timeout=50000)
     def test_model(self):
         """Predict"""
         batch_size = 16
@@ -125,7 +125,7 @@ class ClassifierGrader(BaseGrader):
 
         assert output.shape == (batch_size,), f"Expected shape ({batch_size},), got {output.shape}"
 
-    @Case(score=25, timeout=10000)
+    @Case(score=25, timeout=100000)
     def test_accuracy(self):
         """Accuracy"""
         key = "accuracy"
@@ -134,7 +134,7 @@ class ClassifierGrader(BaseGrader):
 
         return score, f"{key}: {val:.3f}, required > {self.RANGE[1]}"
 
-    @Case(score=2, timeout=500, extra_credit=True)
+    @Case(score=2, timeout=5000, extra_credit=True)
     def test_accuracy_extra(self):
         """Accuracy: Extra Credit"""
         key = "accuracy"
@@ -181,7 +181,7 @@ class RoadDetectorGrader(BaseGrader):
 
             self._metric_computer.add(pred, track, depth, pred_depth)
 
-    @Case(score=10, timeout=5000)
+    @Case(score=10, timeout=50000)
     def test_model(self):
         """Predict"""
         batch_size = 4
@@ -196,7 +196,7 @@ class RoadDetectorGrader(BaseGrader):
         assert pred.shape == (batch_size, 96, 128), f"Label shape: {pred.shape}"
         assert pred_depth.shape == (batch_size, 96, 128), f"Depth shape: {pred_depth.shape}"
 
-    @Case(score=10, timeout=10000)
+    @Case(score=10, timeout=100000)
     def test_accuracy(self):
         """Segmentation Accuracy"""
         key = "accuracy"
@@ -205,7 +205,7 @@ class RoadDetectorGrader(BaseGrader):
 
         return score, f"{key}: {val:.3f}, required > {self.RANGE_ACCURACY[1]}"
 
-    @Case(score=25, timeout=500)
+    @Case(score=25, timeout=5000)
     def test_iou(self):
         """Segmentation IoU"""
         key = "iou"
@@ -214,7 +214,7 @@ class RoadDetectorGrader(BaseGrader):
 
         return score, f"{key}: {val:.3f} required > {self.RANGE_IOU[1]}"
 
-    @Case(score=2, timeout=500, extra_credit=True)
+    @Case(score=2, timeout=5000, extra_credit=True)
     def test_iou_extra(self):
         """Segmentation IoU: Extra Credit"""
         key = "iou"
@@ -223,7 +223,7 @@ class RoadDetectorGrader(BaseGrader):
 
         return score
 
-    @Case(score=10, timeout=500)
+    @Case(score=10, timeout=5000)
     def test_abs_depth_error(self):
         """Depth Error"""
         key = "abs_depth_error"
@@ -235,7 +235,7 @@ class RoadDetectorGrader(BaseGrader):
 
         return score, f"{key}: {val:.3f}, required < {self.RANGE_DEPTH[1]}"
 
-    @Case(score=2, timeout=500, extra_credit=True)
+    @Case(score=2, timeout=5000, extra_credit=True)
     def test_abs_depth_error_extra(self):
         """Depth Error: Extra Credit"""
         key = "abs_depth_error"

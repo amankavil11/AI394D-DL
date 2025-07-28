@@ -161,7 +161,7 @@ class Detector(nn.Module):
 
         self.down_layers = nn.ModuleList()
         self.up_layers = nn.ModuleList()
-        num_down_layers = num_up_layers = 2
+        num_down_layers = num_up_layers = 3
 
         for i in range(num_down_layers):
             if i == 0:
