@@ -19,7 +19,9 @@ def train(exp_dir: str = "logs",
           lr: float = 1e-3,
           batch_size: int = 64,
           weight_decay: float = 1e-4,
-          seed: int = 2024):
+          seed: int = 2024,
+          regression_loss_weight: float = 0.1
+          ):
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -57,8 +59,8 @@ def train(exp_dir: str = "logs",
 
         model.train()
 
-        for i, map in enumerate(train_data):
-            img, true_depth, track = map['image'].to(device), map['depth'].to(device), map['track'].to(device) 
+        for map in train_data:
+            img, true_depth, track = map['image'].to(device), map['depth'].to(device), map['track'].to(device)
 
             optimizer.zero_grad()
 
@@ -66,8 +68,7 @@ def train(exp_dir: str = "logs",
             preds = torch.argmax(logits, dim=1)
             train_metrics.add(preds, track, depth, true_depth)
 
-
-            loss = segment_loss_func(logits, track) + (0.3 * regressor_loss_func(depth, true_depth))
+            loss = segment_loss_func(logits, track) + (regression_loss_weight * regressor_loss_func(depth, true_depth))
             loss.backward()
 
             optimizer.step()
