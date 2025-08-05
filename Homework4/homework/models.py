@@ -21,8 +21,17 @@ class MLPPlanner(nn.Module):
         """
         super().__init__()
 
+        
+
         self.n_track = n_track
         self.n_waypoints = n_waypoints
+        self.mlp_net = nn.Sequential(
+            nn.Linear(in_features=4*n_track, out_features=128),
+            nn.ReLU(),
+            nn.Linear(in_features=128, out_features=128),
+            nn.ReLU(),
+            nn.Linear(in_features=128, out_features=2*n_waypoints)
+        )
 
     def forward(
         self,
@@ -43,7 +52,10 @@ class MLPPlanner(nn.Module):
         Returns:
             torch.Tensor: future waypoints with shape (b, n_waypoints, 2)
         """
-        raise NotImplementedError
+        track = torch.cat([track_left, track_right], dim=2)
+        x = track.view(track.size(0), -1)
+        out = self.mlp_net(x)
+        return out.view(-1, self.n_waypoints, 2)
 
 
 class TransformerPlanner(nn.Module):

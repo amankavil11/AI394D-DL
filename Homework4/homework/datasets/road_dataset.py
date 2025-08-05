@@ -76,9 +76,10 @@ def load_data(
     dataset_path: str,
     transform_pipeline: str = "default",
     return_dataloader: bool = True,
-    num_workers: int = 2,
-    batch_size: int = 32,
+    num_workers: int = 8,
+    batch_size: int = 128,
     shuffle: bool = False,
+    pin_memory: bool = False,
 ) -> DataLoader | Dataset:
     """
     Constructs the dataset/dataloader.
@@ -116,4 +117,11 @@ def load_data(
         num_workers=num_workers,
         batch_size=batch_size,
         shuffle=shuffle,
+        pin_memory=pin_memory
     )
+
+if __name__ == "__main__":
+    x_1 = load_data("drive_data/train", transform_pipeline="state_only", batch_size=1)
+    for entries in x_1:
+        print(entries)
+        break
