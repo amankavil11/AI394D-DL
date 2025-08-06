@@ -257,6 +257,16 @@ class EgoTrackProcessor:
         track_right, _ = pad(track_right, self.n_track)
         waypoints, waypoints_mask = pad(waypoints, self.n_waypoints)
 
+
+        all_track_points = np.concatenate([track_left, track_right], axis=0)  # shape (2*n_track, 2)
+        center = all_track_points.mean(axis=0, keepdims=True)  # (1, 2)
+        std = all_track_points.std(axis=0, keepdims=True) + 1e-6  # (1, 2), avoid divide by 0
+
+        track_left = (track_left - center) / std
+        track_right = (track_right - center) / std
+        waypoints = (waypoints - center) / std
+
+
         return {
             "track_left": track_left.astype(np.float32),
             "track_right": track_right.astype(np.float32),
