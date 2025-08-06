@@ -14,10 +14,10 @@ def train(exp_dir: str = "logs",
         model_name: str = "mlp_planner",
         transform_pipeline: str = "state_only",
         dataset_path: str = "drive_data",
-        num_epoch: int = 120,
+        num_epoch: int = 80,
         lr: float = 0.01,
         batch_size: int = 128,
-        weight_decay: float = 1e-4,
+        weight_decay: float = 1e-5,
         seed: int = 2024
         ):
     if torch.cuda.is_available():
