@@ -14,7 +14,7 @@ def train(exp_dir: str = "logs",
         model_name: str = "mlp_planner",
         transform_pipeline: str = "state_only",
         dataset_path: str = "drive_data",
-        num_epoch: int = 30,
+        num_epoch: int = 120,
         lr: float = 0.001,
         batch_size: int = 128,
         weight_decay: float = 1e-4,
@@ -40,8 +40,8 @@ def train(exp_dir: str = "logs",
     train_data = load_data(f"{dataset_path}/train", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
     val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
 
-    loss_func = torch.nn.HuberLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    loss_func = torch.nn.L1Loss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     global_step = 0
     train_metrics = PlannerMetric()
