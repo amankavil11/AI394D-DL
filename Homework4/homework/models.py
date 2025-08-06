@@ -37,11 +37,11 @@ class MLPPlanner(nn.Module):
             nn.Linear(in_features=512, out_features=256),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.LayerNorm(512),
+            nn.LayerNorm(256),
             nn.Linear(in_features=256, out_features=128),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.LayerNorm(512),
+            nn.LayerNorm(128),
             nn.Linear(in_features=128, out_features=2*n_waypoints)
         )
 
