@@ -59,7 +59,20 @@ def train(exp_dir: str = "logs",
 
             pred_waypoints = model(track_left, track_right)
 
-            loss = loss_func(pred_waypoints[mask], waypoints[mask])
+            pred_masked = pred_waypoints[mask]
+            target_waypoints = waypoints[mask]
+
+            # Separate longitude and latitude
+            pred_long = pred_masked[:, 0]
+            pred_lat = pred_masked[:, 1]
+            target_long = target_waypoints[:, 0]
+            target_lat = target_waypoints[:, 1]
+
+            # Compute individual losses
+            long_loss = loss_func(pred_long, target_long)
+            lat_loss = loss_func(pred_lat, target_lat)
+            loss = 0.3*long_loss + lat_loss
+            
             loss.backward()
             optimizer.step()
 
