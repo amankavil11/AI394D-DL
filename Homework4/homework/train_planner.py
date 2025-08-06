@@ -93,10 +93,7 @@ def train(exp_dir: str = "logs",
 
     torch.save(model.state_dict(), log_dir / f"{model_name}.th")
     print(f"Model saved to {log_dir / f'{model_name}.th'}")
-
-                
-
-                
+      
 
 if __name__ == '__main__':
     train()

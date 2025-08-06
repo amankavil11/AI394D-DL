@@ -76,7 +76,7 @@ def load_data(
     dataset_path: str,
     transform_pipeline: str = "default",
     return_dataloader: bool = True,
-    num_workers: int = 8,
+    num_workers: int = 15,
     batch_size: int = 128,
     shuffle: bool = False,
     pin_memory: bool = False,
@@ -121,6 +121,7 @@ def load_data(
     )
 
 if __name__ == "__main__":
+    # Testing functionality
     x_1 = load_data("drive_data/train", transform_pipeline="state_only", batch_size=1)
     for entries in x_1:
         print(entries)
