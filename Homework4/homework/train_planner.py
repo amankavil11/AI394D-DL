@@ -40,7 +40,7 @@ def train(exp_dir: str = "logs",
     train_data = load_data(f"{dataset_path}/train", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
     val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
 
-    loss_func = torch.nn.HuberLoss()
+    loss_func = torch.nn.L1Loss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     global_step = 0
