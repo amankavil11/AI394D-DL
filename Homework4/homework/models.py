@@ -27,20 +27,20 @@ class MLPPlanner(nn.Module):
         self.n_waypoints = n_waypoints
         self.mlp_net = nn.Sequential(
             nn.Linear(in_features=4*n_track, out_features=512),
-            nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.GELU(),
+            nn.Dropout(0.3),
             nn.LayerNorm(512),
             nn.Linear(in_features=512, out_features=512),
-            nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.GELU(),
+            nn.Dropout(0.3),
             nn.LayerNorm(512),
             nn.Linear(in_features=512, out_features=256),
-            nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.GELU(),
+            nn.Dropout(0.3),
             nn.LayerNorm(256),
             nn.Linear(in_features=256, out_features=128),
-            nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.GELU(),
+            nn.Dropout(0.3),
             nn.LayerNorm(128),
             nn.Linear(in_features=128, out_features=2*n_waypoints)
         )
