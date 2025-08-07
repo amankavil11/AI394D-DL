@@ -88,7 +88,6 @@ def train(exp_dir: str = "logs",
             
 
             optimizer.zero_grad()
-
             
 
             pred_masked = pred_waypoints[mask]
@@ -129,7 +128,9 @@ def train(exp_dir: str = "logs",
                     pred_wp = model(track_left, track_right)
 
                 val_metrics.add(pred_wp, waypoints, mask)
+                logger.add_scalars("x", {"pred": pred_wp.norm(), 'tgt': waypoints.norm()}, global_step=global_step)
 
+        
         
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
             computed_train_metrics = train_metrics.compute()
