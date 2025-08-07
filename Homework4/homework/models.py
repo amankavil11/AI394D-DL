@@ -113,9 +113,9 @@ class TransformerPlanner(nn.Module):
         """
         track = torch.cat([track_left, track_right], dim=2)
 
-        memory = self.input_proj(track)
+        memory = self.input_proj(track).to(track.device)
 
-        queries = self.query_embed.weight.unsqueeze(0)  
+        queries = self.query_embed.weight.expand(memory.size(0), -1, -1).to(track.device)  
 
         decoded = self.decoder(tgt=queries, memory=memory)
 

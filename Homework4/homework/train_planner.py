@@ -90,6 +90,7 @@ def train(exp_dir: str = "logs",
 
             global_step += 1
 
+
         with torch.inference_mode():
             for batch in val_data:
                 track_left = batch['track_left'].to(device)
