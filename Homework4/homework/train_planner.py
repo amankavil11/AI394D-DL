@@ -126,7 +126,7 @@ def train(exp_dir: str = "logs",
                     track_right = batch['track_right'].to(device)
                     pred_wp = model(track_left, track_right)
 
-                    val_metrics.add(pred_wp, waypoints, mask)
+                val_metrics.add(pred_wp, waypoints, mask)
 
         
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
