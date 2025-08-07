@@ -96,11 +96,11 @@ def train(exp_dir: str = "logs",
             
             loss.backward()
             optimizer.step()
-            scheduler.step()
 
             train_metrics.add(pred_waypoints, waypoints, mask)
 
             global_step += 1
+        scheduler.step()
 
 
         with torch.inference_mode():
