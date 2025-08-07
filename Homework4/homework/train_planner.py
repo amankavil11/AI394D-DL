@@ -44,7 +44,7 @@ def train(exp_dir: str = "logs",
         val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
 
         lr = 1e-3
-        num_epoch = 60
+        num_epoch = 30
         weight_decay = 1e-4
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     else:
