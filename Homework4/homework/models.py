@@ -71,7 +71,7 @@ class TransformerPlanner(nn.Module):
         self,
         n_track: int = 10,
         n_waypoints: int = 3,
-        d_model: int = 256,
+        d_model: int = 64,
     ):
         super().__init__()
 
@@ -87,6 +87,7 @@ class TransformerPlanner(nn.Module):
             d_model=d_model, nhead=self.num_heads, 
             dim_feedforward=4 * d_model, 
             activation="gelu", 
+            dropout=0.3
             batch_first=True,
             norm_first=True
         )
