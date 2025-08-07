@@ -48,17 +48,17 @@ def train(exp_dir: str = "logs",
         weight_decay = 1e-5
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     elif model_name == 'transformer_planner':
-        lr = 1e-3
+        lr = 1e-4
         num_epoch = 100
         weight_decay = 1e-4
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
         
         scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer,
-            max_lr=0.001, # peak LR
+            max_lr=1e-3, # peak LR
             steps_per_epoch=len(train_data),
             epochs=num_epoch,
-            pct_start=0.25,          # % of cycle spent warming up
+            pct_start=0.4,          # % of cycle spent warming up
             anneal_strategy='cos'   # cosine decay after warmup
         )
 
