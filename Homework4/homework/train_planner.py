@@ -11,7 +11,7 @@ from .datasets.road_dataset import load_data
 
 
 def train(exp_dir: str = "logs",
-        model_name: str = "transformer_planner",
+        model_name: str = "cnn_planner",
         transform_pipeline: str = "state_only",
         dataset_path: str = "drive_data",
         num_epoch: int = 100,
@@ -37,10 +37,19 @@ def train(exp_dir: str = "logs",
     model = load_model(model_name).to(device)
     model.train()
 
-    train_data = load_data(f"{dataset_path}/train", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
-    val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
+    if model_name == 'cnn_planner':
+        transform_pipeline = 'default'
+        train_data = load_data(f"{dataset_path}/train", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
+        val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
 
-    #TODO if-else for diff models optimizers and lr, and num_epoch, etc.
+        lr = 1e-3
+        num_epoch = 60
+        weight_decay = 1e-4
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    else:
+        train_data = load_data(f"{dataset_path}/train", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
+        val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
+
     loss_func = torch.nn.L1Loss()
     if model_name == 'mlp_planner':
         lr = 0.01
@@ -53,15 +62,7 @@ def train(exp_dir: str = "logs",
         weight_decay = 1e-4
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
         
-        # scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        #     optimizer,
-        #     max_lr=5e-3, # peak LR
-        #     steps_per_epoch=len(train_data),
-        #     epochs=num_epoch,
-        #     pct_start=0.4,          # % of cycle spent warming up
-        #     anneal_strategy='cos'   # cosine decay after warmup
-        # )
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.95)
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.95) #Probably don't need scheduler tbh
 
 
     global_step = 0
@@ -71,14 +72,21 @@ def train(exp_dir: str = "logs",
     for epoch in range(num_epoch):
 
         for batch in train_data:
-            track_left = batch['track_left'].to(device)
-            track_right = batch['track_right'].to(device)
             waypoints = batch['waypoints'].to(device)
             mask = batch['waypoints_mask'].to(device)
+
+            if model_name == "cnn_planner":
+                img = batch['image'].to(device)
+                pred_waypoints = model(img)
+            else:
+                track_left = batch['track_left'].to(device)
+                track_right = batch['track_right'].to(device)
+                pred_waypoints = model(track_left, track_right)
             
+
             optimizer.zero_grad()
 
-            pred_waypoints = model(track_left, track_right)
+            
 
             pred_masked = pred_waypoints[mask]
             target_waypoints = waypoints[mask]
@@ -98,22 +106,26 @@ def train(exp_dir: str = "logs",
             optimizer.step()
 
             train_metrics.add(pred_waypoints, waypoints, mask)
-
             global_step += 1
-        scheduler.step()
+        if scheduler:
+            scheduler.step()
 
 
         with torch.inference_mode():
             model.eval()
             for batch in val_data:
-                track_left = batch['track_left'].to(device)
-                track_right = batch['track_right'].to(device)
                 waypoints = batch['waypoints'].to(device)
                 mask = batch['waypoints_mask'].to(device)
 
-                pred_wp = model(track_left, track_right)
+                if model_name == "cnn_planner":
+                    img = batch['image'].to(device)
+                    pred_wp = model(img)
+                else:
+                    track_left = batch['track_left'].to(device)
+                    track_right = batch['track_right'].to(device)
+                    pred_wp = model(track_left, track_right)
 
-                val_metrics.add(pred_wp, waypoints, mask)
+                    val_metrics.add(pred_wp, waypoints, mask)
 
         
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:

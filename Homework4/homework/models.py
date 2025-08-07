@@ -136,6 +136,51 @@ class CNNPlanner(torch.nn.Module):
         self.register_buffer("input_mean", torch.as_tensor(INPUT_MEAN), persistent=False)
         self.register_buffer("input_std", torch.as_tensor(INPUT_STD), persistent=False)
 
+
+        class BlockLayer(nn.Module):
+            def __init__(self, in_channels, out_channels, kernel_sizes=[3, 1, 3], stride=2, residual=False):
+                super().__init__()
+                self.residual = residual
+
+                self.conv_block = nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels, kernel_sizes[0], stride, padding=kernel_sizes[0] // 2),
+                    nn.ReLU(),
+                    nn.Conv2d(out_channels, out_channels, kernel_sizes[1], stride=1, padding=kernel_sizes[1] // 2),
+                    nn.ReLU(),
+                    nn.Conv2d(out_channels, out_channels, kernel_sizes[2], stride=1, padding=kernel_sizes[2] // 2),
+                    nn.ReLU(),
+                    nn.Dropout(0.3)
+                )
+                if self.residual:
+                    self.identity = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride)
+                else:
+                    self.identity = None
+
+
+            def forward(self, x):
+                out = self.conv_block(x)
+
+                if self.residual:
+                    return out + self.identity(x)
+                else:
+                    return out
+
+
+        layers = []
+        self.first_conv_layer = torch.nn.Conv2d(3, 96, kernel_size=9, stride=2, padding=4)
+
+        self.regressor = nn.Sequential(
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Conv2d(384, 2*self.n_waypoints, kernel_size=1),
+        )
+
+        layers.append(self.first_conv_layer)
+        layers.append(BlockLayer(96, 192, residual=True))
+        layers.append(BlockLayer(192, 384, residual=True))
+        layers.append(self.regressor)
+
+        self.model = nn.Sequential(*layers)
+
     def forward(self, image: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Args:
@@ -147,7 +192,9 @@ class CNNPlanner(torch.nn.Module):
         x = image
         x = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
-        raise NotImplementedError
+        return self.model(x).reshape(x.size(0), self.n_waypoints, 2)
+
+        
 
 
 MODEL_FACTORY = {
