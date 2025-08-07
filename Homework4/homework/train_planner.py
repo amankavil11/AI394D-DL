@@ -48,11 +48,19 @@ def train(exp_dir: str = "logs",
         weight_decay = 1e-5
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     elif model_name == 'transformer_planner':
-        lr = 1e-4
+        lr = 1e-3
         num_epoch = 100
         weight_decay = 1e-4
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, patience=2, threshold=0.01)
+        
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=0.001, # peak LR
+            steps_per_epoch=len(train_data),
+            epochs=num_epoch,
+            pct_start=0.1,          # % of cycle spent warming up
+            anneal_strategy='cos'   # cosine decay after warmup
+        )
 
     global_step = 0
     train_metrics = PlannerMetric()
@@ -86,6 +94,7 @@ def train(exp_dir: str = "logs",
             
             loss.backward()
             optimizer.step()
+            scheduler.step()
 
             train_metrics.add(pred_waypoints, waypoints, mask)
 
