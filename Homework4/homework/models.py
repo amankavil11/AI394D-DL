@@ -71,20 +71,21 @@ class TransformerPlanner(nn.Module):
         self,
         n_track: int = 10,
         n_waypoints: int = 3,
-        d_model: int = 128,
+        d_model: int = 256,
     ):
         super().__init__()
 
         self.n_track = n_track
         self.n_waypoints = n_waypoints
-        self.num_layers = int(d_model // 64)
+        self.num_layers = 2
+        self.num_heads = int(d_model // 64)
 
         self.query_embed = nn.Embedding(n_waypoints, d_model)
         self.input_proj = nn.Linear(4, d_model)
 
         decoder_layer = nn.TransformerDecoderLayer(
-            d_model=d_model, nhead=2, 
-            dim_feedforward=4*d_model, 
+            d_model=d_model, nhead=self.num_heads, 
+            dim_feedforward=4 * d_model, 
             activation="gelu", 
             batch_first=True,
             norm_first=True
