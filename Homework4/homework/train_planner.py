@@ -104,7 +104,6 @@ def train(exp_dir: str = "logs",
                 val_metrics.add(pred_wp, waypoints, mask)
 
         
-        #TODO Fix metric output formatting
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
             computed_train_metrics = train_metrics.compute()
             computed_val_metrics = val_metrics.compute()
