@@ -18,6 +18,7 @@ def train(exp_dir: str = "logs",
         lr: float = 1e-4,
         batch_size: int = 128,
         weight_decay: float = 1e-4,
+        loss_weight: float = 0.2,
         seed: int = 2024
         ):
     if torch.cuda.is_available():
@@ -46,6 +47,7 @@ def train(exp_dir: str = "logs",
         lr = 1e-3
         num_epoch = 30
         weight_decay = 1e-4
+        loss_weight = 0.3
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     else:
         train_data = load_data(f"{dataset_path}/train", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
@@ -101,7 +103,7 @@ def train(exp_dir: str = "logs",
             # Compute individual losses
             long_loss = loss_func(pred_long, target_long)
             lat_loss = loss_func(pred_lat, target_lat)
-            loss = 0.2*long_loss + lat_loss
+            loss = loss_weight*long_loss + lat_loss
             
             loss.backward()
             optimizer.step()
