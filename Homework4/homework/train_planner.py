@@ -11,11 +11,11 @@ from .datasets.road_dataset import load_data
 
 
 def train(exp_dir: str = "logs",
-        model_name: str = "mlp_planner",
+        model_name: str = "transformer_planner",
         transform_pipeline: str = "state_only",
         dataset_path: str = "drive_data",
         num_epoch: int = 100,
-        lr: float = 1e-3,
+        lr: float = 1e-4,
         batch_size: int = 128,
         weight_decay: float = 1e-4,
         seed: int = 2024
