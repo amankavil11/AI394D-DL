@@ -48,7 +48,7 @@ def train(exp_dir: str = "logs",
         weight_decay = 1e-5
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     elif model_name == 'transformer_planner':
-        lr = 1e-4
+        lr = 1e-3
         num_epoch = 100
         weight_decay = 1e-4
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -94,7 +94,7 @@ def train(exp_dir: str = "logs",
             
             loss.backward()
             optimizer.step()
-            scheduler.step()
+            # scheduler.step()
 
             train_metrics.add(pred_waypoints, waypoints, mask)
 
@@ -102,6 +102,7 @@ def train(exp_dir: str = "logs",
 
 
         with torch.inference_mode():
+            model.eval()
             for batch in val_data:
                 track_left = batch['track_left'].to(device)
                 track_right = batch['track_right'].to(device)
