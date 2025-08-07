@@ -58,7 +58,7 @@ def train(exp_dir: str = "logs",
             max_lr=0.001, # peak LR
             steps_per_epoch=len(train_data),
             epochs=num_epoch,
-            pct_start=0.1,          # % of cycle spent warming up
+            pct_start=0.25,          # % of cycle spent warming up
             anneal_strategy='cos'   # cosine decay after warmup
         )
 
