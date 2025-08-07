@@ -33,6 +33,7 @@ def train(exp_dir: str = "logs",
     # directory with timestamp to save tensorboard logs and model checkpoints
     log_dir = Path(exp_dir) / f"{model_name}_{datetime.now().strftime('%m%d_%H%M%S')}"
     logger = tb.SummaryWriter(log_dir)
+    scheduler = None
 
     model = load_model(model_name).to(device)
     model.train()
