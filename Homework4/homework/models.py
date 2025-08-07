@@ -87,7 +87,7 @@ class TransformerPlanner(nn.Module):
             d_model=d_model, nhead=self.num_heads, 
             dim_feedforward=4 * d_model, 
             activation="gelu", 
-            dropout=0.3
+            dropout=0.2,
             batch_first=True,
             norm_first=True
         )

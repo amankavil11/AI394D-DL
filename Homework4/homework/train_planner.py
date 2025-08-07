@@ -52,6 +52,7 @@ def train(exp_dir: str = "logs",
         num_epoch = 100
         weight_decay = 1e-4
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, patience=2, threshold=0.01)
 
     global_step = 0
     train_metrics = PlannerMetric()
@@ -81,7 +82,7 @@ def train(exp_dir: str = "logs",
             # Compute individual losses
             long_loss = loss_func(pred_long, target_long)
             lat_loss = loss_func(pred_lat, target_lat)
-            loss = 0.3*long_loss + lat_loss
+            loss = 0.2*long_loss + lat_loss
             
             loss.backward()
             optimizer.step()
@@ -105,10 +106,19 @@ def train(exp_dir: str = "logs",
         
         #TODO Fix metric output formatting
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
+            computed_train_metrics = train_metrics.compute()
+            computed_val_metrics = val_metrics.compute()
+            train_lat_error = computed_train_metrics['lateral_error']
+            train_lon_error = computed_train_metrics['longitudinal_error']
+            val_lat_error = computed_val_metrics['lateral_error']
+            val_lon_error = computed_val_metrics['longitudinal_error']
+            train_weighted_loss = 0.2 * train_lon_error + train_lat_error
+            val_weighted_loss = 0.2 * val_lon_error + val_lat_error
+
             print(
                 f"\nEpoch {epoch + 1:2d} / {num_epoch:2d}: "
-                f"train_metrics={train_metrics.compute()} "
-                 f"val_metrics={val_metrics.compute()}"
+                f"train_metrics={train_lon_error, train_lat_error, train_weighted_loss} "
+                 f"val_metrics={val_lon_error, val_lat_error, val_weighted_loss}"
             )
         
         train_metrics.reset()
