@@ -14,10 +14,10 @@ def train(exp_dir: str = "logs",
         model_name: str = "mlp_planner",
         transform_pipeline: str = "state_only",
         dataset_path: str = "drive_data",
-        num_epoch: int = 20,
-        lr: float = 0.01,
+        num_epoch: int = 100,
+        lr: float = 1e-3,
         batch_size: int = 128,
-        weight_decay: float = 1e-5,
+        weight_decay: float = 1e-4,
         seed: int = 2024
         ):
     if torch.cuda.is_available():
@@ -40,8 +40,13 @@ def train(exp_dir: str = "logs",
     train_data = load_data(f"{dataset_path}/train", batch_size=batch_size, shuffle=True, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
     val_data = load_data(f"{dataset_path}/val", batch_size=batch_size, pin_memory=torch.cuda.is_available(), transform_pipeline=transform_pipeline)
 
+    #TODO if-else for diff models optimizers and lr, and num_epoch, etc.
     loss_func = torch.nn.L1Loss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    if model_name == 'mlp_planner':
+        lr = 0.01
+        num_epoch = 20
+        weight_decay = 1e-5
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     global_step = 0
     train_metrics = PlannerMetric()
@@ -92,6 +97,7 @@ def train(exp_dir: str = "logs",
                 val_metrics.add(pred_wp, waypoints, mask)
 
         
+        #TODO Fix metric output formatting
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
             print(
                 f"\nEpoch {epoch + 1:2d} / {num_epoch:2d}: "
