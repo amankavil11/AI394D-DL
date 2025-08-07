@@ -47,6 +47,11 @@ def train(exp_dir: str = "logs",
         num_epoch = 20
         weight_decay = 1e-5
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    elif model_name == 'transformer_planner':
+        lr = 1e-4
+        num_epoch = 100
+        weight_decay = 1e-4
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     global_step = 0
     train_metrics = PlannerMetric()
